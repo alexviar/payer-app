@@ -1,7 +1,9 @@
 import WebView from 'react-native-webview'
 import { useFetchAppSettings } from './useFetchAppSettings'
 import { WebViewError } from './WebViewError'
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { WebViewLoader } from './WebViewLoader'
+import { StyleSheet, View } from 'react-native'
 
 type Props = {
   onLoaded(): void
@@ -11,6 +13,21 @@ const APP_ID = 14
 
 const MainScreen = ({ onLoaded }: Props) => {
   const webViewRef = useRef<WebView>(null)
+  const [loadProgress, setLoadProgress] = useState(0)
+
+  // Inicializamos isLoading en true para capturar únicamente la carga inicial.
+  // onLoadStart se dispara en cada cambio de ruta interno, por lo que no es útil para este caso.
+  const [isLoading, setIsLoading] = useState(true)
+  const [showLoader, setShowLoader] = useState(true)
+
+  useEffect(() => {
+    if (!isLoading) {
+      const timeoutId = setTimeout(() => setShowLoader(false), 300)
+      return () => clearTimeout(timeoutId)
+    }
+    setShowLoader(true)
+  }, [isLoading])
+  console.log(isLoading, showLoader)
 
   const { data } = useFetchAppSettings(APP_ID)
 
@@ -21,11 +38,32 @@ const MainScreen = ({ onLoaded }: Props) => {
       <WebView
         ref={webViewRef}
         source={{ uri: data?.webUrl }}
-        onLoadEnd={() => {
+        onLoadProgress={(event) => {
+          if (!isLoading) return
+          const progress = event.nativeEvent.progress
+          setLoadProgress(progress)
+        }}
+        onLoadEnd={(e) => {
+          setIsLoading(false)
+          setLoadProgress(1)
           onLoaded()
         }}
-        renderError={() => <WebViewError onRetry={() => webViewRef.current?.reload()} />}
+        renderError={() => <WebViewError onRetry={() => {
+          setIsLoading(true)
+          setLoadProgress(0)
+          webViewRef.current?.reload()
+        }} />}
       />
+
+      {/* 
+        Renderizamos el Loader condicionalmente en lugar de usar la prop `renderLoading` para prevenir el bug 
+        reportado en https://github.com/react-native-webview/react-native-webview/issues/563#issuecomment-715503350 
+      */}
+      {showLoader && (
+        <View style={StyleSheet.absoluteFillObject}>
+          <WebViewLoader progress={loadProgress} />
+        </View>
+      )}
     </>
   )
 }
