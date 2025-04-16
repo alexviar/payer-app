@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { SafeAreaView, View } from 'react-native'
+import { SafeAreaView } from 'react-native'
 import BootSplash from "react-native-bootsplash"
 import MainScreen from './MainScrean'
 import SplashVideo from './SplashVideo'
@@ -23,12 +23,10 @@ const App = () => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
+      <MainScreen onLoaded={() => setMainScreenReady(true)} />
       {shouldShowSplash && <SplashVideo
         onVideoEnd={() => setSplashVideoEnded(true)}
       />}
-      <View style={{ display: shouldShowSplash ? 'none' : 'contents' }}>
-        <MainScreen onLoaded={() => setMainScreenReady(true)} />
-      </View>
     </SafeAreaView>
   )
 }

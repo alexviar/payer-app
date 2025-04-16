@@ -1,15 +1,28 @@
-import { useEffect } from "react"
-import { Text } from "react-native"
+import WebView from 'react-native-webview'
+import { useFetchAppSettings } from './useFetchAppSettings'
 
 type Props = {
   onLoaded(): void
 }
 
+const APP_ID = 14
+
 const MainScreen = ({ onLoaded }: Props) => {
-  useEffect(() => {
-    setTimeout(onLoaded, 500)
-  }, [])
-  return null
+
+  const { data } = useFetchAppSettings(APP_ID)
+
+  if (!data) return
+
+  return (
+    <>
+      <WebView
+        source={{ uri: data?.webUrl }}
+        onLoadEnd={() => {
+          onLoaded()
+        }}
+      />
+    </>
+  )
 }
 
 export default MainScreen
