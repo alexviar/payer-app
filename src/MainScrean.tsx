@@ -22,7 +22,10 @@ const MainScreen = ({ onLoaded }: Props) => {
 
   useEffect(() => {
     if (!isLoading) {
-      const timeoutId = setTimeout(() => setShowLoader(false), 300)
+      const timeoutId = setTimeout(() => {
+        setShowLoader(false)
+        onLoaded()
+      }, 300)
       return () => clearTimeout(timeoutId)
     }
     setShowLoader(true)
@@ -46,7 +49,6 @@ const MainScreen = ({ onLoaded }: Props) => {
         onLoadEnd={(e) => {
           setIsLoading(false)
           setLoadProgress(1)
-          onLoaded()
         }}
         renderError={() => <WebViewError onRetry={() => {
           setIsLoading(true)
