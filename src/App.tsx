@@ -19,7 +19,7 @@ const App = () => {
     return () => clearTimeout(timer);
   }, [])
 
-  const shouldShowSplash = !(mainScreenReady || splashVideoEnded) || !splashTimeoutDone
+  const shouldShowSplash = !splashVideoEnded && (!mainScreenReady || !splashTimeoutDone)
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
