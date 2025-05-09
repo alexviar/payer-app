@@ -1,9 +1,8 @@
-import WebView from 'react-native-webview'
-import { useFetchAppSettings } from './useFetchAppSettings'
-import { WebViewError } from './WebViewError'
-import { useEffect, useRef, useState } from 'react'
-import { WebViewLoader } from './WebViewLoader'
+import React, { useEffect, useRef, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
+import WebView from 'react-native-webview'
+import { WebViewError } from './WebViewError'
+import { WebViewLoader } from './WebViewLoader'
 
 type Props = {
   onLoaded(): void
@@ -32,15 +31,13 @@ const MainScreen = ({ onLoaded }: Props) => {
   }, [isLoading])
   console.log(isLoading, showLoader)
 
-  const { data } = useFetchAppSettings(APP_ID)
-
-  if (!data) return
+  const webUrl = 'https://www.payerupdate.com'
 
   return (
     <>
       <WebView
         ref={webViewRef}
-        source={{ uri: data?.webUrl }}
+        source={{ uri: webUrl }}
         onLoadProgress={(event) => {
           if (!isLoading) return
           const progress = event.nativeEvent.progress
