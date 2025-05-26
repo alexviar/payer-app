@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { BackHandler, Linking, Platform, StyleSheet, ToastAndroid, View } from 'react-native';
 import { PERMISSIONS, request } from 'react-native-permissions';
 import WebView from 'react-native-webview';
 import { WebViewError } from './WebViewError';
@@ -33,6 +33,26 @@ const MainScreen = ({ onLoaded }: Props) => {
   console.log(isLoading, showLoader)
 
   const webUrl = 'https://www.payerupdate.com'
+
+
+  useEffect(() => {
+    let lastBackPressed = 0;
+    const backAction = () => {
+      const time = new Date().getTime();
+      if (time - lastBackPressed < 2000) {
+        // Si se presiona dos veces en menos de 2 segundos, se permite la salida
+        return false;
+      } else {
+        lastBackPressed = time;
+        ToastAndroid.show('Presiona de nuevo para salir', ToastAndroid.SHORT);
+        return true; // Interceptamos el back para evitar cerrar inmediatamente
+      }
+    };
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+    return () => backHandler.remove();
+  }, []);
 
   return (
     <>
