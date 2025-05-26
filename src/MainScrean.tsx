@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { StyleSheet, View } from 'react-native'
-import WebView from 'react-native-webview'
-import { WebViewError } from './WebViewError'
-import { WebViewLoader } from './WebViewLoader'
+import React, { useEffect, useRef, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { PERMISSIONS, request } from 'react-native-permissions';
+import WebView from 'react-native-webview';
+import { WebViewError } from './WebViewError';
+import { WebViewLoader } from './WebViewLoader';
 
 type Props = {
   onLoaded(): void
@@ -38,6 +39,14 @@ const MainScreen = ({ onLoaded }: Props) => {
       <WebView
         ref={webViewRef}
         source={{ uri: webUrl }}
+        onFileDownload={async ({ nativeEvent }) => {
+          if (Platform.OS === 'android') {
+            const result = await request(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE)
+            if (result !== 'granted') return
+          }
+          const { downloadUrl } = nativeEvent
+          Linking.openURL(downloadUrl)
+        }}
         onLoadProgress={(event) => {
           if (!isLoading) return
           const progress = event.nativeEvent.progress
