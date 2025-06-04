@@ -59,7 +59,7 @@ jobs:
           chmod +x gradlew  # Dar permisos de ejecución al archivo
           ./gradlew bundleRelease --no-daemon --build-cache
 
-      - name: Build AAB
+      - name: Guardar AAB
         uses: actions/upload-artifact@v4
         with:
           name: app-release-apk
