@@ -51,4 +51,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: PayerApp-Simulator-App
-          path: ios/build/Build/Products/Release-iphonesimulator/PayerApp.app
+          path: ios/build/Build/Products/Release-iphoneos/PayerApp.app
