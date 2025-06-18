@@ -76,7 +76,7 @@ jobs:
             -archivePath "${{github.workspace}}/ios/build/PayerApp.xcarchive" \
             -exportOptionsPlist ExportOptions.plist \
             -exportPath "${{github.workspace}}/ios/build/export" \
-            -allowProvisioningUpdates 1>/dev/null
+            -allowProvisioningUpdates
         env:
           CI: "true"
           DEVELOPER_DIR: "/Applications/Xcode.app/Contents/Developer"
