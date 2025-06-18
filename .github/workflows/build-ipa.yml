@@ -48,6 +48,9 @@ jobs:
             -P "${{ secrets.IOS_CERTIFICATE_PASSWORD }}" \
             -T /usr/bin/codesign \
             -T /usr/bin/security
+          security set-key-partition-list \
+            -S apple-tool:,apple:,codesign: \
+            -s -k "" build.keychain
 
       - name: List identities (optional debug)
         run: |
