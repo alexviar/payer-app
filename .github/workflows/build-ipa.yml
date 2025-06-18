@@ -1,0 +1,76 @@
+name: Build iOS IPA
+
+on:
+  push:
+    branches: [main, feature/configure-ios-workflow]
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: |
+          npm ci
+
+      - name: Install CocoaPods dependencies
+        run: |
+          cd ios
+          pod install
+
+      - name: Create keychain
+        run: |
+          security create-keychain -p "" build.keychain
+          security list-keychains -s build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "" build.keychain
+          security set-keychain-settings build.keychain
+
+      - name: Install certificate
+        run: |
+          echo "${{ secrets.IOS_CERTIFICATE }}" | base64 -d > certificate.p12
+          security import certificate.p12 -k build.keychain -P "${{ secrets.IOS_CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
+
+      - name: Install provisioning profile
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "${{ secrets.IOS_PROVISIONING_PROFILE }}" | base64 -d > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+
+      - name: Build IPA
+        run: |
+          cd ios
+          xcodebuild -workspace PayerApp.xcworkspace \
+            -scheme PayerApp \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath ${{github.workspace}}/ios/build/PayerApp.xcarchive \
+            -allowProvisioningUpdates \
+            archive
+          xcodebuild -exportArchive \
+            -archivePath ${{github.workspace}}/ios/build/PayerApp.xcarchive \
+            -exportOptionsPlist ExportOptions.plist \
+            -exportPath ${{github.workspace}}/ios/build/export \
+            -allowProvisioningUpdates
+        env:
+          CI: "true"
+          DEVELOPER_DIR: "/Applications/Xcode.app/Contents/Developer"
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PayerApp-IPA
+          path: ios/build/export/*.ipa
+
+      - name: Clean up
+        if: always()
+        run: |
+          security delete-keychain build.keychain
