@@ -68,14 +68,15 @@ jobs:
             -scheme PayerApp \
             -configuration Release \
             -sdk iphoneos \
-            -archivePath ${{github.workspace}}/ios/build/PayerApp.xcarchive \
+            -archivePath "${{github.workspace}}/ios/build/PayerApp.xcarchive" \
             -allowProvisioningUpdates \
-            archive
+            archive 1>/dev/null
+
           xcodebuild -exportArchive \
-            -archivePath ${{github.workspace}}/ios/build/PayerApp.xcarchive \
+            -archivePath "${{github.workspace}}/ios/build/PayerApp.xcarchive" \
             -exportOptionsPlist ExportOptions.plist \
-            -exportPath ${{github.workspace}}/ios/build/export \
-            -allowProvisioningUpdates
+            -exportPath "${{github.workspace}}/ios/build/export" \
+            -allowProvisioningUpdates 1>/dev/null
         env:
           CI: "true"
           DEVELOPER_DIR: "/Applications/Xcode.app/Contents/Developer"
