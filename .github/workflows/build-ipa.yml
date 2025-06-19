@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feature/configure-ios-workflow
   workflow_dispatch:
 
 jobs:
