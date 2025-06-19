@@ -34,6 +34,25 @@ const MainScreen = ({ onLoaded }: Props) => {
 
   const webUrl = 'https://www.payerupdate.com'
 
+  const handleDownload = async (downloadUrl: string) => {
+    if (Platform.OS === 'android') {
+      const result = await request(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE)
+      if (result !== 'granted') return
+    }
+    Linking.openURL(downloadUrl)
+  }
+
+  const onMessage = (event: any) => {
+    try {
+      const data = JSON.parse(event.nativeEvent.data)
+
+      if (data.type === 'DOWNLOAD_FILE') {
+        handleDownload(data.downloadUrl)
+      }
+    } catch (error) {
+      console.log('Error parsing message:', error)
+    }
+  }
 
   useEffect(() => {
     let lastBackPressed = 0;
@@ -59,14 +78,8 @@ const MainScreen = ({ onLoaded }: Props) => {
       <WebView
         ref={webViewRef}
         source={{ uri: webUrl }}
-        onFileDownload={async ({ nativeEvent }) => {
-          if (Platform.OS === 'android') {
-            const result = await request(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE)
-            if (result !== 'granted') return
-          }
-          const { downloadUrl } = nativeEvent
-          Linking.openURL(downloadUrl)
-        }}
+        onMessage={onMessage}
+        onFileDownload={({ nativeEvent: { downloadUrl } }) => handleDownload(downloadUrl)}
         onLoadProgress={(event) => {
           if (!isLoading) return
           const progress = event.nativeEvent.progress
