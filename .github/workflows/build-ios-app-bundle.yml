@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/configure-ios-workflow
+
   workflow_dispatch:
 
 jobs:
@@ -27,6 +28,10 @@ jobs:
           cd ios
           pod install
 
+      - name: Patch SDKROOT to iphonesimulator for CI build
+        run: |
+          sed -i.bak 's/SDKROOT = iphoneos;/SDKROOT = iphonesimulator;/g' ios/PayerApp.xcodeproj/project.pbxproj
+
       - name: Build for Simulator
         run: |
           cd ios
@@ -47,8 +52,11 @@ jobs:
           CI: "true"
           DEVELOPER_DIR: "/Applications/Xcode.app/Contents/Developer"
 
+      - name: List build output
+        run: ls -R ios/build/Build/Products
+
       - name: Upload .app artifact
         uses: actions/upload-artifact@v4
         with:
           name: PayerApp-Simulator-App
-          path: ios/build/Build/Products/Release-iphoneos/PayerApp.app
+          path: ios/build/Build/Products/Release-iphonesimulator/PayerApp.app
